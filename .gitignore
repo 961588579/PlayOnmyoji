@@ -1,0 +1,7 @@
+.vscode/
+dist/
+build/
+__pycache__/
+docs/
+screenshot/tmp.png
+PlayManager.spec
