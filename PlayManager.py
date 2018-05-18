@@ -2,36 +2,55 @@
 
 import sys
 import time
+import _thread
+import tkinter as tk
+from tkinter import messagebox as mBox
+from tkinter import Menu, Spinbox, scrolledtext, ttk
+
+import Const
 import Utils
 from TanSuo import TanSuo
-import tkinter as tk
-from tkinter import ttk
-from tkinter import scrolledtext
-from tkinter import Menu
-from tkinter import Spinbox
-from tkinter import messagebox as mBox
+from YuHun import YuHun
 
-autoPlay = True
 
-if __name__ == "__main__":
-    tanSuo = TanSuo()
+class PlayManager:
 
-    Utils.CMD("adb connect 127.0.0.1:7555")
-    Utils.CMD("adb wait-for-device")
+    def __init__(self):
+        self.autoPlay = False
+        self.playMode = Const.PLAY_MODE.TANSUO
+        self.tanSuo = TanSuo()
+        self.yuHun = YuHun()
 
-    while autoPlay:
+    def changeMode(self, mode):
+        self.playMode = mode
+
+    def playThread(self, threadName, delay):
+        print("playThread")
+        while True:
+            time.sleep(3)
+            print("autoPlay " + str(self.autoPlay))
+            if self.autoPlay:
+                try:
+                    Utils.screenshot()
+                except:
+                    print("Unexpected error:", sys.exc_info()[0])
+                    raise
+
+                if Utils.find_and_click(Const.COMMON_WIN):
+                    continue
+                if Utils.find_and_click(Const.COMMON_END):
+                    pass
+                if Utils.find_and_click(Const.COMMON_LOSE):
+                    pass
+
+                if self.playMode == Const.PLAY_MODE.TANSUO:
+                    self.tanSuo.doTanSuo()
+                elif self.playMode == Const.PLAY_MODE.YUHUN:
+                    self.yuHun.doYuHun()
+
+    def startPlay(self):
         try:
-            Utils.screenshot()
+            print("startPlay")
+            _thread.start_new_thread(self.playThread, ("Thread-1", 2, ))
         except:
-            print("Unexpected error:", sys.exc_info()[0])
-            raise
-
-        if Utils.find_and_click('./res/end.png'):
-            continue
-        elif Utils.find('./res/tansuo/flag.png'):
-            print("在探索界面")
-            tanSuo.doTanSuo()
-        else:
-            tanSuo.doEnterTanSuo(25)
-
-        time.sleep(3)
+            print("Error: unable to start thread")

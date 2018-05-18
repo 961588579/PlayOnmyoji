@@ -6,6 +6,7 @@ import os
 import time
 import cv2
 import numpy as np
+import Const
 
 source = "./screenshot/tmp.png"
 
@@ -33,9 +34,10 @@ def screenshot():
 
     source = (path + "/" + timestamp + ".png").replace("\\", "/")
 
-    adb_shell("screencap -p /storage/emulated/0/Pictures/tmp.png")
-    CMD("adb pull /storage/emulated/0/Pictures/tmp.png " + source)
-    adb_shell("rm /storage/emulated/0/Pictures/tmp.png")
+    android_path = '/storage/emulated/0/Pictures/tmp.png'
+    adb_shell("screencap -p " + android_path)
+    CMD("adb pull " + android_path + " " + source)
+    adb_shell("rm " + android_path)
     print("success " + source)
 
 
@@ -47,6 +49,8 @@ def getPosition(search):
 
     res = cv2.cv2.matchTemplate(img, template, cv2.cv2.TM_CCOEFF_NORMED)
     threshold = 0.99  # 匹配度
+    if Const.TINGYUAN_TANSUO == search:
+        threshold = 0.80  # 匹配度
     position = []
 
     loc = np.where(res >= threshold)  # 匹配程度大于%80的坐标y,x
