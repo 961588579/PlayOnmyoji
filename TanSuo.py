@@ -18,6 +18,9 @@ class TanSuo:
 
         if Utils.find(Const.TANSUO_FLAG):
             print("在探索界面")
+
+            Utils.find_and_click(Const.TANSUO_GU_DING_ZHEN_RONG)
+
             # 探索Boss
             if Utils.find_and_click(Const.TANSUO_BOSS):
                 return

@@ -19,36 +19,41 @@ def CMD(cmd):
     return subprocess.call(cmd)
 
 
+def adb(cmd):
+    return subprocess.call("adb -s " + Const.DEVICE.MUMU + " " + cmd)
+
+
 def adb_shell(cmd):
-    return subprocess.call("adb shell " + cmd)
+    return adb("shell " + cmd)
 
 
 def screenshot():
 
-    path = PATH(os.getcwd() + "/screenshot")
+    path = PATH("./screenshot")
     if not os.path.isdir(path):
         os.makedirs(path)
-    timestamp = time.strftime(
-        '%Y-%m-%d-%H-%M-%S', time.localtime(time.time()))
-    timestamp = "tmp"
-
-    source = (path + "/" + timestamp + ".png").replace("\\", "/")
 
     android_path = '/storage/emulated/0/Pictures/tmp.png'
-    adb_shell("screencap -p " + android_path)
-    CMD("adb pull " + android_path + " " + source)
-    adb_shell("rm " + android_path)
-    print("success " + source)
+    adb("shell screencap -p " + android_path)
+    adb("pull " + android_path + " " + source)
+    adb("shell rm " + android_path)
+
+    # 试图直接保存到电脑，然后失败了
+    # save_path = (path + "/tmp.png").replace("\\", "/")
+    # adb('shell screencap -p | ./sed \'s/\r$//\' > test.png')
+    print("success " + path)
 
 
 def getPosition(search):
-    print("source " + source + "search " + search)
+    print("source " + source + " search " + search)
+    if not os.path.exists(source) or not os.path.exists(search):
+        return []
     img = cv2.cv2.imread(source, 0)
     template = cv2.cv2.imread(search, 0)
     sp = template.shape
 
     res = cv2.cv2.matchTemplate(img, template, cv2.cv2.TM_CCOEFF_NORMED)
-    threshold = 0.99  # 匹配度
+    threshold = 0.90  # 匹配度
     if Const.TINGYUAN_TANSUO == search:
         threshold = 0.80  # 匹配度
     position = []
@@ -62,13 +67,13 @@ def getPosition(search):
 
 
 def tap(x, y):
-    adb_shell("input tap " + str(x) + " " + str(y))
+    adb("shell input tap " + str(x) + " " + str(y))
 
 
 def swipe(deltax, deltay):
     print("滑动 " + str(deltax) + ", " + str(deltay))
-    adb_shell("input swipe 640 320 " +
-              str(640 + deltax) + " " + str(320 + deltay))
+    adb("shell input swipe 640 320 " +
+        str(640 + deltax) + " " + str(320 + deltay))
 
 
 def find(search):
